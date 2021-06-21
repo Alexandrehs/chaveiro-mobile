@@ -4,17 +4,20 @@ import {
     Text,
     StyleSheet
 } from 'react-native';
-import { RectButton } from 'react-native-gesture-handler';
+import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 
-interface TagProps {
-    title: string;
+interface TagProps extends RectButtonProps {
+    name: string;
 }
 
-export function Tag({ title }: TagProps) {
+export function Tag({ name, ...rest }: TagProps) {
     return (
-        <RectButton style={styles.container}>
+        <RectButton
+            style={styles.container}
+            {...rest}
+        >
             <Text style={styles.title}>
-                {title}
+                {name}
             </Text>
         </RectButton>
     );
@@ -22,11 +25,10 @@ export function Tag({ title }: TagProps) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: '#d3d3d3',
         borderRadius: 15,
-        width: 100,
-        height: 30,
+        width: 110,
+        height: 40,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 10,

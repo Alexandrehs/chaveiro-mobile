@@ -1,18 +1,17 @@
 import React from 'react';
 import {
     View,
-    Text,
-    StyleSheet
+    StyleSheet,
+    Image
 } from 'react-native';
+
 
 import Constants from 'expo-constants';
 
 export function Headers() {
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>
-                Chaveiro Mega
-            </Text>
+            <Image source={require('../../assets/logo.png')} style={styles.logo} />
         </View>
     );
 }
@@ -20,16 +19,21 @@ export function Headers() {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
+        height: 100,
         marginTop: Constants.statusBarHeight,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 20,
     },
     title: {
-        fontSize: 24,
-        fontWeight: '700',
+        fontSize: 50,
+        fontWeight: 'bold',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#ff4040'
+        color: '#ff4040',
+        fontFamily: 'Pacifico_400Regular',
     },
+    logo: {
+        height: 100,
+        width: '100%'
+    }
 });

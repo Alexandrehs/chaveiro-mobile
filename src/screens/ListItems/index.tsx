@@ -2,108 +2,142 @@ import React, { useEffect, useState } from 'react';
 import {
     SafeAreaView,
     View,
-    Text,
-    StyleSheet
+    StyleSheet,
+    FlatList,
+    TouchableOpacity,
+    Text
 } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
 import { Cards } from '../../components/Cards';
 
 import { Headers } from '../../components/Headers';
+import { Loading } from '../../components/Loading';
 import { Tag } from '../../components/Tag';
 import api from '../../services/api';
+import colors from '../../styles/colors';
 
 interface ItemProps {
     id: string;
     name: string;
-    brand: string;
+    brandid: string;
     price: number;
     storage: number;
     minimum: number;
 }
 
+interface BrandProps {
+    id: string;
+    name: string;
+}
+
 export function ListItems() {
     const [items, setItems] = useState<ItemProps[]>([]);
-    //const tags = ['Chevrolet', 'Volkswagem', 'Fiat', 'Ford', 'Honda', 'Hyundai', 'Renault', 'Peogeot'];
-    const tags = [
-        {
-            id: 1,
-            name: 'Chevrolet'
-        },
-        {
-            id: 2,
-            name: 'Volkswagem'
-        },
-        {
-            id: 3,
-            name: 'Fiat'
-        },
-        {
-            id: 4,
-            name: 'Ford'
-        },
-        {
-            id: 5,
-            name: 'Honda'
-        },
-        {
-            id: 6,
-            name: 'Hyundai'
-        },
-        {
-            id: 7,
-            name: 'Renault'
-        },
-        {
-            id: 8,
-            name: 'Peogeot'
-        },
-    ]
+    const [brands, setBrands] = useState<BrandProps[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [itemsSelectedByBrands, setItemsSelectedByBrands] = useState<ItemProps[]>([]);
+
+    async function fetchBrands() {
+        try {
+            const { data } = await api.get("brands");
+
+            if (data) {
+                setBrands([
+                    {
+                        id: 'all',
+                        name: 'Todos'
+                    },
+                    ...data
+                ]);
+                setLoading(false);
+            }
+        } catch (error) {
+        }
+    }
 
     async function fetcItems() {
-        const { data } = await api.get("/items");
+        try {
+            const { data } = await api.get("items");
 
-        if (data) {
-            setItems(data);
+            if (data) {
+                setItems(data);
+                setLoading(false);
+                setItemsSelectedByBrands(data);
+            }
+        } catch (error) {
+            setLoading(true);
+        }
+
+    }
+
+    function getBrandName(id: string) {
+        let brandName = '...';
+        brands.map((brand) => {
+            if (brand.id === id) {
+                brandName = brand.name
+            }
+        });
+        return brandName;
+    }
+
+    function handleSelectItemsbyBrand(brand: string) {
+        setLoading(true);
+        if (brand === 'all')
+            return setItemsSelectedByBrands(items);
+
+        const itemsFilteredByBrand = items.filter(item =>
+            item.brandid.includes(brand)
+        );
+
+        if (itemsFilteredByBrand) {
+            setLoading(false)
+            setItemsSelectedByBrands(itemsFilteredByBrand);
         }
     }
 
     useEffect(() => {
+        fetchBrands();
         fetcItems();
     }, []);
 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Headers />
-            </View>
-            <View style={styles.tags}>
-                <FlatList
-                    data={tags}
-                    keyExtractor={(item) => String(item.id)}
-                    renderItem={({ item }) => (
-                        <Tag
-                            title={item.name}
-                        />
-                    )}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                />
-            </View>
-            <View style={styles.itemsContainer}>
-                <FlatList
-                    data={items}
-                    keyExtractor={(item) => String(item.id)}
-                    renderItem={({ item }) => (
-                        <Cards
-                            name={item.name}
-                            brand={item.brand}
-                            price={item.price}
-                            storage={item.storage}
-                        />
-                    )}
-                    showsVerticalScrollIndicator={false}
-                />
-            </View>
+            {
+                loading ?
+                    <Loading /> :
+                    <>
+                        <Headers />
+                        <View>
+                            <FlatList
+                                data={brands}
+                                keyExtractor={(item) => String(item.id)}
+                                renderItem={({ item }) => (
+                                    <Tag
+                                        name={item.name}
+                                        onPress={() => handleSelectItemsbyBrand(item.id)}
+                                    />
+                                )}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.tags}
+                            />
+                        </View>
+                        <View style={styles.itemsContainer}>
+                            <FlatList
+                                data={itemsSelectedByBrands}
+                                keyExtractor={(item) => String(item.id)}
+                                renderItem={({ item }) => (
+                                    <Cards
+                                        id={item.id}
+                                        name={item.name}
+                                        brand={getBrandName(item.brandid)}
+                                        price={String(item.price)}
+                                        storage={String(item.storage)}
+                                    />
+                                )}
+                                showsVerticalScrollIndicator={true}
+                            />
+                        </View>
+                    </>
+            }
         </SafeAreaView>
     );
 }
@@ -111,16 +145,23 @@ export function ListItems() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingHorizontal: 5,
+        backgroundColor: colors.white,
+        justifyContent: 'space-between'
     },
     header: {
-
+        height: 90,
+        padding: 5,
     },
     itemsContainer: {
         flex: 1,
-        alignItems: 'center',
-        paddingVertical: 30,
+        paddingHorizontal: 15,
+        width: '100%',
+        marginTop: 10
     },
     tags: {
-        paddingTop: 20,
+        padding: 5,
+        marginTop: 20,
     },
+
 });
