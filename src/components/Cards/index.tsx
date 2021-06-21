@@ -4,7 +4,9 @@ import {
     Text,
     StyleSheet,
     Animated,
-    Alert
+    Alert,
+    Modal,
+    TextInput
 } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -34,8 +36,10 @@ export function Cards({
 
     const [storageReal, setStorageReal] = useState<string>(storage);
     const swipeRef = useRef<Swipeable | null>(null);
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [inputEntrance, setInputEntrance] = useState<string>('');
 
-    function handleAlert() {
+    function handleAlertExit() {
         Alert.alert(
             "Baixa,",
             "sera removido 1 do estoque deste item.",
@@ -53,6 +57,19 @@ export function Cards({
                 cancelable: true
             }
         );
+    }
+
+    async function handleEntrance() {
+        if (inputEntrance !== '') {
+            const entrance = Number(inputEntrance) + Number(storageReal);
+            await api.put(`items/${id}`, {
+                storage: String(entrance)
+            });
+
+            setStorageReal(String(entrance));
+            setModalVisible(!modalVisible);
+            swipeRef.current?.close();
+        }
     }
 
     async function handleExit() {
@@ -88,9 +105,19 @@ export function Cards({
                 <Animated.View>
                     <RectButton
                         style={styles.buttomExit}
-                        onPress={handleAlert}
+                        onPress={handleAlertExit}
                     >
                         <Feather name="edit" size={50} color={colors.red} />
+                    </RectButton>
+                </Animated.View>
+            )}
+            renderLeftActions={() => (
+                <Animated.View>
+                    <RectButton
+                        style={styles.buttomEntrance}
+                        onPress={() => { setModalVisible(true) }}
+                    >
+                        <Feather name="edit" size={50} color={colors.green_dark} />
                     </RectButton>
                 </Animated.View>
             )}
@@ -125,6 +152,85 @@ export function Cards({
                     </Text>
                 </View>
             </RectButton>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+            >
+                <View style={styles.modal}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalHeader}>
+                            <View>
+                                <Text
+                                    style={{ fontSize: 16 }}
+                                >
+                                    Quantos produtos entraram?
+                                </Text>
+                            </View>
+                        </View>
+                        <View style={styles.modalContent}>
+                            <TextInput
+                                keyboardType="number-pad"
+                                style={
+                                    {
+                                        backgroundColor: colors.shape,
+                                        height: 25,
+                                        width: 40,
+                                        textAlign: 'center'
+                                    }
+                                }
+                                value={inputEntrance}
+                                onChangeText={text => setInputEntrance(text)}
+                            />
+                        </View>
+                        <View style={styles.modalFooter}>
+                            <View>
+                                <RectButton
+                                    style={
+                                        {
+                                            height: 50,
+                                            width: 120,
+                                            backgroundColor: colors.green_light,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: 10,
+                                            marginRight: 20,
+                                            borderRadius: 10
+                                        }
+                                    }
+                                    onPress={handleEntrance}
+                                >
+                                    <Text>
+                                        Confirmar
+                                    </Text>
+                                </RectButton>
+                            </View>
+
+                            <View>
+                                <RectButton
+                                    style={
+                                        {
+                                            height: 50,
+                                            width: 120,
+                                            backgroundColor: colors.red,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            marginBottom: 10,
+                                            borderRadius: 10
+                                        }
+                                    }
+                                    onPress={() => { setModalVisible(!modalVisible) }}
+                                >
+                                    <Text>
+                                        Cancelar
+                                    </Text>
+                                </RectButton>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </Swipeable>
     )
 }
@@ -172,5 +278,41 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         right: 20,
         paddingLeft: 15
-    }
+    },
+    buttomEntrance: {
+        flex: 1,
+        width: 150,
+        backgroundColor: colors.white,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        right: 20,
+        paddingLeft: 15
+    },
+    modal: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 22
+    },
+    modalContainer: {
+        backgroundColor: colors.white,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: 150,
+        width: 300
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    modalContent: {
+        alignItems: 'center'
+    },
+    modalFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignContent: 'space-around'
+    },
 });
