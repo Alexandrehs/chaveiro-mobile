@@ -3,26 +3,23 @@ import {
     View,
     Text,
     StyleSheet,
-    Animated,
     Alert,
-    Modal,
-    TextInput
 } from 'react-native';
-import { RectButton } from 'react-native-gesture-handler';
+import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-
-import Feather from '@expo/vector-icons/Feather';
 
 import colors from '../../styles/colors';
 import { Tag } from '../Tag';
 import api from '../../services/api';
+import { useNavigation } from '@react-navigation/native';
 
-interface CardProps {
+interface CardProps extends RectButtonProps {
     id: string;
     name: string;
     brand: string;
     price: string;
     storage: string;
+    warning: boolean;
 }
 
 export function Cards({
@@ -31,207 +28,47 @@ export function Cards({
     brand,
     price,
     storage,
+    warning,
     ...rest
 }: CardProps) {
 
-    const [storageReal, setStorageReal] = useState<string>(storage);
-    const swipeRef = useRef<Swipeable | null>(null);
-    const [modalVisible, setModalVisible] = useState<boolean>(false);
-    const [inputEntrance, setInputEntrance] = useState<string>('');
-
-    function handleAlertExit() {
-        Alert.alert(
-            "Baixa,",
-            "sera removido 1 do estoque deste item.",
-            [
-                {
-                    text: "Confirmar",
-                    onPress: () => handleExit()
-                },
-                {
-                    text: "Cancelar",
-                    onPress: () => { swipeRef.current?.close() }
-                }
-            ],
-            {
-                cancelable: true
-            }
-        );
-    }
-
-    async function handleEntrance() {
-        if (inputEntrance !== '') {
-            const entrance = Number(inputEntrance) + Number(storageReal);
-            await api.put(`items/${id}`, {
-                storage: String(entrance)
-            });
-
-            setStorageReal(String(entrance));
-            setModalVisible(!modalVisible);
-            swipeRef.current?.close();
-        }
-    }
-
-    async function handleExit() {
-        try {
-            const storageNumber = Number(storageReal);
-            let newStorage = storageNumber - 1;
-
-            if (newStorage < 0) {
-                newStorage = 0;
-                swipeRef.current?.close();
-                return Alert.alert("Desculpe o item ja está sem estoque.");
-            }
-
-            await api.put(`items/${id}`, {
-                storage: String(newStorage)
-            });
-
-            setStorageReal(String(newStorage));
-
-            swipeRef.current?.close();
-
-        } catch (error) {
-            throw Error(error)
-        }
-    }
-
-
     return (
-        <Swipeable
-            ref={swipeRef}
-            overshootRight={false}
-            renderRightActions={() => (
-                <Animated.View>
-                    <RectButton
-                        style={styles.buttomExit}
-                        onPress={handleAlertExit}
-                    >
-                        <Feather name="edit" size={50} color={colors.red} />
-                    </RectButton>
-                </Animated.View>
-            )}
-            renderLeftActions={() => (
-                <Animated.View>
-                    <RectButton
-                        style={styles.buttomEntrance}
-                        onPress={() => { setModalVisible(true) }}
-                    >
-                        <Feather name="edit" size={50} color={colors.green_dark} />
-                    </RectButton>
-                </Animated.View>
-            )}
+        <RectButton
+            style={
+                [
+                    styles.container,
+                    warning && styles.containerWarning
+                ]
+            }
+            {...rest}
         >
-            <RectButton
-                style={styles.container}
-                {...rest}
-            >
 
-                <View style={styles.titles}>
-                    <Text style={styles.name}>
-                        {name}
-                    </Text>
-                    <Tag
-                        name={brand}
-                    />
-                </View>
+            <View style={styles.titles}>
+                <Text style={styles.name}>
+                    {name}
+                </Text>
+                <Tag
+                    name={brand}
+                    active={false}
+                />
+            </View>
 
-                <View style={styles.details}>
-                    <Text >
-                        Preço
-                    </Text>
-                    <Text style={styles.price}>
-                        {`R$ ${price},00`}
-                    </Text>
+            <View style={styles.details}>
+                <Text >
+                    Preço
+                </Text>
+                <Text style={styles.price}>
+                    {`R$ ${price},00`}
+                </Text>
 
-                    <Text >
-                        Estoque
-                    </Text>
-                    <Text style={styles.storage}>
-                        {storageReal}
-                    </Text>
-                </View>
-            </RectButton>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-            >
-                <View style={styles.modal}>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalHeader}>
-                            <View>
-                                <Text
-                                    style={{ fontSize: 16 }}
-                                >
-                                    Quantos produtos entraram?
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={styles.modalContent}>
-                            <TextInput
-                                keyboardType="number-pad"
-                                style={
-                                    {
-                                        backgroundColor: colors.shape,
-                                        height: 25,
-                                        width: 40,
-                                        textAlign: 'center'
-                                    }
-                                }
-                                value={inputEntrance}
-                                onChangeText={text => setInputEntrance(text)}
-                            />
-                        </View>
-                        <View style={styles.modalFooter}>
-                            <View>
-                                <RectButton
-                                    style={
-                                        {
-                                            height: 50,
-                                            width: 120,
-                                            backgroundColor: colors.green_light,
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            marginBottom: 10,
-                                            marginRight: 20,
-                                            borderRadius: 10
-                                        }
-                                    }
-                                    onPress={handleEntrance}
-                                >
-                                    <Text>
-                                        Confirmar
-                                    </Text>
-                                </RectButton>
-                            </View>
-
-                            <View>
-                                <RectButton
-                                    style={
-                                        {
-                                            height: 50,
-                                            width: 120,
-                                            backgroundColor: colors.red,
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            marginBottom: 10,
-                                            borderRadius: 10
-                                        }
-                                    }
-                                    onPress={() => { setModalVisible(!modalVisible) }}
-                                >
-                                    <Text>
-                                        Cancelar
-                                    </Text>
-                                </RectButton>
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-        </Swipeable>
+                <Text >
+                    Estoque
+                </Text>
+                <Text style={styles.storage}>
+                    {storage}
+                </Text>
+            </View>
+        </RectButton>
     )
 }
 
@@ -247,8 +84,19 @@ const styles = StyleSheet.create({
         backgroundColor: colors.shape,
         marginVertical: 5,
     },
+    containerWarning: {
+        width: '100%',
+        height: 150,
+        padding: 10,
+        borderRadius: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: colors.warning,
+        marginVertical: 5,
+    },
     titles: {
-        flex: 1
+        flex: 1,
     },
     name: {
         fontSize: 17,

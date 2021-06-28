@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    View,
     Text,
     StyleSheet
 } from 'react-native';
@@ -8,12 +7,22 @@ import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 
 interface TagProps extends RectButtonProps {
     name: string;
+    active: boolean;
 }
 
-export function Tag({ name, ...rest }: TagProps) {
+export function Tag(
+    {
+        name, active, ...rest
+    }: TagProps
+) {
     return (
         <RectButton
-            style={styles.container}
+            style={
+                [
+                    styles.container,
+                    active && styles.containerActive
+                ]
+            }
             {...rest}
         >
             <Text style={styles.title}>
@@ -27,6 +36,16 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#d3d3d3',
         borderRadius: 15,
+        width: 120,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 10,
+        marginLeft: 6
+    },
+    containerActive: {
+        backgroundColor: '#adadad',
+        borderRadius: 15,
         width: 110,
         height: 40,
         alignItems: 'center',
@@ -35,7 +54,7 @@ const styles = StyleSheet.create({
         marginLeft: 6
     },
     title: {
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '700',
         color: '#5f5f5f',
     },

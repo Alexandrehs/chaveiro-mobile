@@ -1,11 +1,11 @@
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
     SafeAreaView,
     View,
     StyleSheet,
     FlatList,
-    TouchableOpacity,
-    Text
+    TextInput
 } from 'react-native';
 import { Cards } from '../../components/Cards';
 
@@ -19,21 +19,24 @@ interface ItemProps {
     id: string;
     name: string;
     brandid: string;
-    price: number;
-    storage: number;
-    minimum: number;
+    price: string;
+    storage: string;
+    minimum: string;
 }
 
 interface BrandProps {
     id: string;
     name: string;
 }
-
 export function ListItems() {
     const [items, setItems] = useState<ItemProps[]>([]);
     const [brands, setBrands] = useState<BrandProps[]>([]);
+    const [brandSelected, setBrandSelected] = useState<string>('all');
     const [loading, setLoading] = useState(true);
-    const [itemsSelectedByBrands, setItemsSelectedByBrands] = useState<ItemProps[]>([]);
+    const [itemsFiltered, setItemsFiltered] = useState<ItemProps[]>([]);
+    const [query, setQuery] = useState<string>('');
+    const navigation = useNavigation();
+    const isFocused = useIsFocused();
 
     async function fetchBrands() {
         try {
@@ -43,11 +46,10 @@ export function ListItems() {
                 setBrands([
                     {
                         id: 'all',
-                        name: 'Todos'
+                        name: 'TODOS'
                     },
                     ...data
                 ]);
-                setLoading(false);
             }
         } catch (error) {
         }
@@ -60,7 +62,7 @@ export function ListItems() {
             if (data) {
                 setItems(data);
                 setLoading(false);
-                setItemsSelectedByBrands(data);
+                setItemsFiltered(data);
             }
         } catch (error) {
             setLoading(true);
@@ -79,24 +81,68 @@ export function ListItems() {
     }
 
     function handleSelectItemsbyBrand(brand: string) {
-        setLoading(true);
+        setBrandSelected(brand);
         if (brand === 'all')
-            return setItemsSelectedByBrands(items);
+            return setItemsFiltered(items);
 
         const itemsFilteredByBrand = items.filter(item =>
             item.brandid.includes(brand)
         );
 
-        if (itemsFilteredByBrand) {
-            setLoading(false)
-            setItemsSelectedByBrands(itemsFilteredByBrand);
+        if (itemsFilteredByBrand)
+            setItemsFiltered(itemsFilteredByBrand);
+    }
+
+    function renderHeaderSearch() {
+        return (
+            <View
+                style={styles.containerHeaderSearch}
+            >
+                <TextInput
+                    autoCorrect={false}
+                    value={query}
+                    onChangeText={text => handleSearch(text)}
+                    style={styles.inputHeaderSearch}
+                    placeholder="pesquisar"
+                />
+            </View>
+        );
+    }
+
+    function handleSearch(text: string) {
+        if (text) {
+            const searching = items.filter((item) => {
+                const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
+                const textData = text.toUpperCase();
+
+                return itemData.indexOf(textData) > -1;
+            });
+
+            setItemsFiltered(searching);
+            setQuery(text);
+        } else {
+            setQuery(text);
         }
+    }
+
+    function handleItemDetail(
+        id: string,
+        name: string,
+        price: string,
+        storage: string
+    ) {
+        navigation.navigate('ItemDetail', {
+            id: id,
+            name: name,
+            price: price,
+            storage: storage,
+        });
     }
 
     useEffect(() => {
         fetchBrands();
         fetcItems();
-    }, []);
+    }, [isFocused]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -106,6 +152,17 @@ export function ListItems() {
                     <>
                         <Headers />
                         <View>
+                            <View
+                                style={styles.containerHeaderSearch}
+                            >
+                                <TextInput
+                                    autoCorrect={false}
+                                    value={query}
+                                    onChangeText={text => handleSearch(text)}
+                                    style={styles.inputHeaderSearch}
+                                    placeholder="pesquisar"
+                                />
+                            </View>
                             <FlatList
                                 data={brands}
                                 keyExtractor={(item) => String(item.id)}
@@ -113,6 +170,7 @@ export function ListItems() {
                                     <Tag
                                         name={item.name}
                                         onPress={() => handleSelectItemsbyBrand(item.id)}
+                                        active={item.id === brandSelected}
                                     />
                                 )}
                                 horizontal
@@ -122,7 +180,7 @@ export function ListItems() {
                         </View>
                         <View style={styles.itemsContainer}>
                             <FlatList
-                                data={itemsSelectedByBrands}
+                                data={itemsFiltered}
                                 keyExtractor={(item) => String(item.id)}
                                 renderItem={({ item }) => (
                                     <Cards
@@ -130,10 +188,17 @@ export function ListItems() {
                                         name={item.name}
                                         brand={getBrandName(item.brandid)}
                                         price={String(item.price)}
-                                        storage={String(item.storage)}
+                                        storage={item.storage}
+                                        warning={Number(item.storage) <= Number(item.minimum)}
+                                        onPress={() => handleItemDetail(
+                                            item.id,
+                                            item.name,
+                                            item.price,
+                                            item.storage
+                                        )}
                                     />
                                 )}
-                                showsVerticalScrollIndicator={true}
+                                showsVerticalScrollIndicator={false}
                             />
                         </View>
                     </>
@@ -163,5 +228,16 @@ const styles = StyleSheet.create({
         padding: 5,
         marginTop: 20,
     },
-
+    containerHeaderSearch: {
+        flex: 1,
+        marginBottom: 10,
+        paddingVertical: 20,
+        paddingHorizontal: 20
+    },
+    inputHeaderSearch: {
+        backgroundColor: colors.shape,
+        height: 40,
+        borderRadius: 20,
+        paddingHorizontal: 15
+    },
 });
