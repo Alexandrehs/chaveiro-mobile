@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { ListItems } from '../screens/ListItems';
 import { ItemDetail } from '../screens/ItemDetail';
+import { TabBotton } from './tabsBotton.routes';
 
 const Stack = createStackNavigator();
 
@@ -12,7 +12,7 @@ export function StackRoutes() {
         >
             <Stack.Screen
                 name="ListItems"
-                component={ListItems}
+                component={TabBotton}
             />
             <Stack.Screen
                 name="ItemDetail"

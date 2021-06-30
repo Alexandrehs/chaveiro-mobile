@@ -1,17 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import {
     View,
     Text,
     StyleSheet,
-    Alert,
 } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 import colors from '../../styles/colors';
 import { Tag } from '../Tag';
-import api from '../../services/api';
-import { useNavigation } from '@react-navigation/native';
 
 interface CardProps extends RectButtonProps {
     id: string;
@@ -99,7 +95,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     name: {
-        fontSize: 17,
+        fontSize: 16,
         fontWeight: '700',
         lineHeight: 30,
         paddingRight: 10,

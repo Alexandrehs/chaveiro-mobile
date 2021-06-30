@@ -1,5 +1,6 @@
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
+import { useRef } from 'react';
 import {
     SafeAreaView,
     View,
@@ -37,6 +38,7 @@ export function ListItems() {
     const [query, setQuery] = useState<string>('');
     const navigation = useNavigation();
     const isFocused = useIsFocused();
+    const flatListItemRef = useRef<FlatList>(null);
 
     async function fetchBrands() {
         try {
@@ -91,22 +93,11 @@ export function ListItems() {
 
         if (itemsFilteredByBrand)
             setItemsFiltered(itemsFilteredByBrand);
-    }
 
-    function renderHeaderSearch() {
-        return (
-            <View
-                style={styles.containerHeaderSearch}
-            >
-                <TextInput
-                    autoCorrect={false}
-                    value={query}
-                    onChangeText={text => handleSearch(text)}
-                    style={styles.inputHeaderSearch}
-                    placeholder="pesquisar"
-                />
-            </View>
-        );
+        flatListItemRef.current?.scrollToIndex({
+            index: 0,
+            animated: true
+        })
     }
 
     function handleSearch(text: string) {
@@ -180,6 +171,7 @@ export function ListItems() {
                         </View>
                         <View style={styles.itemsContainer}>
                             <FlatList
+                                ref={flatListItemRef}
                                 data={itemsFiltered}
                                 keyExtractor={(item) => String(item.id)}
                                 renderItem={({ item }) => (

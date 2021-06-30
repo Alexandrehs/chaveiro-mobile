@@ -8,7 +8,11 @@ import {
     SafeAreaView,
     TextInput,
     TouchableOpacity,
-    Alert
+    Alert,
+    KeyboardAvoidingView,
+    TouchableWithoutFeedback,
+    Platform,
+    Keyboard
 } from 'react-native';
 import api from '../../services/api';
 import colors from '../../styles/colors';
@@ -31,6 +35,7 @@ export function ItemDetail() {
 
     const [theAmount, setTheAmout] = useState('');
     const navigation = useNavigation();
+    const [loading, setLoading] = useState(false);
 
     function handleAction(action: string) {
         if (action === 'entrance') {
@@ -76,11 +81,11 @@ export function ItemDetail() {
         let newStorage = 0;
         if (Number(theAmount) > 0 && theAmount !== '') {
             newStorage = Number(storage) + Number(theAmount);
-            await updateItem(id, String(newStorage));
+            await updateItem(id, String(newStorage), '1');
         } else {
             Alert.alert(
                 "Desculpe",
-                "O valor tem que ser positivo",
+                "O valor tem que ser positivo ou deve conter um valor.",
                 [
                     {
                         text: "OK"
@@ -97,11 +102,11 @@ export function ItemDetail() {
         let newStorage = 0;
         if (Number(theAmount) > 0 && theAmount !== '') {
             newStorage = Number(storage) - Number(theAmount);
-            updateItem(id, String(newStorage));
+            updateItem(id, String(newStorage), '2');
         } else {
             Alert.alert(
                 "Desculpe",
-                "O valor tem que ser positivo",
+                "O valor tem que ser positivo ou deve conter um valor.",
                 [
                     {
                         text: "OK"
@@ -114,144 +119,161 @@ export function ItemDetail() {
         }
     }
 
-    async function updateItem(id: string, newStorage: string) {
-        await api.put(`items/${id}`, {
-            storage: String(newStorage)
-        });
+    async function updateItem(id: string, newStorage: string, type: string) {
+        const url = `items/${id}?type=${type}`;
+        try {
+            await api.put(url, {
+                storage: String(newStorage)
+            });
 
-        Alert.alert(
-            "OK",
-            "Alterações salvas.",
-            [
+            Alert.alert(
+                "OK",
+                "Alterações salvas.",
+                [
+                    {
+                        text: "OK",
+                        onPress: () => navigation.goBack()
+                    }
+                ],
                 {
-                    text: "OK",
-                    onPress: () => navigation.goBack()
+                    cancelable: false
                 }
-            ],
-            {
-                cancelable: true
-            }
-        );
+            );
+
+        } catch (error) {
+            console.log(url);
+        }
     }
 
     return (
-        <View style={styles.constainer}>
-            <View>
-                <Text style={styles.title}>
-                    {name}
-                </Text>
-            </View>
-            <View style={styles.content}>
-                <View style={{
-                    flex: 1,
-                    alignItems: 'center'
-                }}>
-                    <Text>
-                        Preço
-                    </Text>
-                    <Text style={styles.contentText}>
-                        {`R$ ${price},00`}
-                    </Text>
-                </View>
-                <View style={{
-                    flex: 1,
-                    alignItems: 'center'
-                }}>
-                    <Text>
-                        Estoque
-                    </Text>
-                    <Text style={styles.contentText}>
-                        {storage}
-                    </Text>
-                </View>
-            </View>
-            <View>
-                <TextInput
-                    style={{
-                        backgroundColor: '#E8E8E8',
-                        height: 40,
-                        width: 150,
-                        borderRadius: 20,
-                        paddingHorizontal: 15
-                    }}
-                    autoCorrect={false}
-                    value={theAmount}
-                    onChangeText={text => setTheAmout(text)}
-                    placeholder="quantidade..."
-                    keyboardType="numeric"
-                />
-            </View>
-            <View style={styles.actions}>
-                <View style={styles.buttons}>
-                    <View>
-                        <TouchableOpacity
-                            style={{
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: colors.green_light,
-                                height: 50,
-                                width: 110,
-                                borderRadius: 30,
-                                marginRight: 100
-                            }}
-                            onPress={() => handleAction('entrance')}
-                        >
-                            <Text
-                                style={{
-                                    fontSize: 16,
-                                    fontWeight: 'bold'
-                                }}
-                            >
-                                Entrada
+        <SafeAreaView style={styles.constainer}>
+            <KeyboardAvoidingView
+                style={styles.constainer}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+                <TouchableWithoutFeedback
+                    onPress={Keyboard.dismiss}
+                >
+                    <View style={{
+                        alignItems: 'center'
+                    }}>
+                        <View>
+                            <Text style={styles.title}>
+                                {name}
                             </Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View>
-                        <TouchableOpacity
-                            style={{
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                backgroundColor: colors.red,
-                                height: 50,
-                                width: 110,
-                                borderRadius: 30,
-                            }}
-                            onPress={() => handleAction('exit')}
-                        >
-                            <Text
+                        </View>
+                        <View style={styles.content}>
+                            <View style={{
+                                flex: 1,
+                                alignItems: 'center'
+                            }}>
+                                <Text>
+                                    Preço
+                                </Text>
+                                <Text style={styles.contentText}>
+                                    {`R$ ${price},00`}
+                                </Text>
+                            </View>
+                            <View style={{
+                                flex: 1,
+                                alignItems: 'center'
+                            }}>
+                                <Text>
+                                    Estoque
+                                </Text>
+                                <Text style={styles.contentText}>
+                                    {storage}
+                                </Text>
+                            </View>
+                        </View>
+                        <View>
+                            <TextInput
                                 style={{
-                                    fontSize: 16,
-                                    fontWeight: 'bold'
+                                    backgroundColor: '#E8E8E8',
+                                    height: 40,
+                                    width: 150,
+                                    borderRadius: 20,
+                                    paddingHorizontal: 15
                                 }}
-                            >
-                                Saida
-                            </Text>
-                        </TouchableOpacity>
+                                autoCorrect={false}
+                                value={theAmount}
+                                onChangeText={text => setTheAmout(text)}
+                                placeholder="quantidade..."
+                                keyboardType="numeric"
+                            />
+                        </View>
+                        <View style={styles.actions}>
+                            <View style={styles.buttons}>
+                                <View>
+                                    <TouchableOpacity
+                                        style={{
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: colors.green_light,
+                                            height: 50,
+                                            width: 110,
+                                            borderRadius: 30,
+                                            marginRight: 100
+                                        }}
+                                        onPress={() => handleAction('entrance')}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 16,
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            Entrada
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <View>
+                                    <TouchableOpacity
+                                        style={{
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            backgroundColor: colors.red,
+                                            height: 50,
+                                            width: 110,
+                                            borderRadius: 30,
+                                        }}
+                                        onPress={() => handleAction('exit')}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: 16,
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            Saida
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
                     </View>
-                </View>
-            </View>
-        </View>
+                </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     constainer: {
         flex: 1,
-        alignItems: 'center',
-        alignContent: 'center',
         justifyContent: 'space-around',
     },
     title: {
         fontSize: 30,
         fontWeight: 'bold',
-        padding: 10,
+        paddingBottom: 25,
         alignItems: 'center',
         alignContent: 'center'
     },
     content: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        padding: 5,
+        paddingVertical: 20
     },
     contentText: {
         fontWeight: 'bold',
@@ -263,5 +285,6 @@ const styles = StyleSheet.create({
     buttons: {
         flexDirection: 'row',
         alignContent: 'space-between',
+        paddingTop: 10
     },
 });
