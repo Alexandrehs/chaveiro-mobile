@@ -1,12 +1,14 @@
 import { useIsFocused, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRef } from 'react';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { FlatList } from 'react-native';
 import {
-    SafeAreaView,
+    TextInput,
     View,
+    SafeAreaView,
     StyleSheet,
-    FlatList,
-    TextInput
 } from 'react-native';
 import { Cards } from '../../components/Cards';
 
@@ -15,109 +17,79 @@ import { Loading } from '../../components/Loading';
 import { Tag } from '../../components/Tag';
 import api from '../../services/api';
 import colors from '../../styles/colors';
-
-interface ItemProps {
-    id: string;
-    name: string;
-    brandid: string;
-    price: string;
-    storage: string;
-    minimum: string;
-}
+import { ItemDetail } from '../ItemDetail';
 
 interface BrandProps {
     id: string;
     name: string;
 }
-export function ListItems() {
-    const [items, setItems] = useState<ItemProps[]>([]);
+
+interface YalesProps {
+    id: string;
+    name: string;
+    price: string;
+    storage: string;
+    minimum: string;
+    brandid: string;
+}
+
+export function ListYales() {
     const [brands, setBrands] = useState<BrandProps[]>([]);
-    const [brandSelected, setBrandSelected] = useState<string>('all');
+    const [brandSelected, setBrandSelected] = useState('all');
+    const [yales, setYales] = useState<YalesProps[]>([])
+    const [yalesFiltered, setYalesFiltered] = useState<YalesProps[]>([]);
+    const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(true);
-    const [itemsFiltered, setItemsFiltered] = useState<ItemProps[]>([]);
-    const [query, setQuery] = useState<string>('');
     const navigation = useNavigation();
     const isFocused = useIsFocused();
     const flatListItemRef = useRef<FlatList>(null);
 
     async function fetchBrands() {
         try {
-            const { data } = await api.get("brands/1");
-
-            if (data) {
-                setBrands([
-                    {
-                        id: 'all',
-                        name: 'TODOS'
-                    },
-                    ...data
-                ]);
-            }
+            const { data } = await api.get("brands/2");
+            setBrands([
+                {
+                    id: "all",
+                    name: "TODOS"
+                },
+                ...data
+            ]);
         } catch (error) {
+            throw error;
         }
     }
 
-    async function fetcItems() {
+    async function fetchYales() {
         try {
-            const { data } = await api.get("items");
-
-            if (data) {
-                setItems(data);
-                setLoading(false);
-                setItemsFiltered(data);
-                setBrandSelected("all");
-
-                flatListItemRef.current?.scrollToIndex({
-                    index: 0,
-                    animated: true
-                });
-            }
+            const { data } = await api.get("yales");
+            setYales(data);
+            setYalesFiltered(data);
+            setLoading(false);
         } catch (error) {
-            setLoading(true);
+            throw error;
         }
-
     }
 
     function getBrandName(id: string) {
-        let brandName = '...';
-        brands.map((brand) => {
-            if (brand.id === id) {
-                brandName = brand.name
-            }
+        let brandName = "";
+        brands?.map(brand => {
+            if (brand.id === id)
+                brandName = brand.name;
         });
+
         return brandName;
-    }
-
-    function handleSelectItemsbyBrand(brand: string) {
-        setBrandSelected(brand);
-        flatListItemRef.current?.scrollToIndex({
-            index: 0,
-            animated: true
-        });
-
-        if (brand === 'all') {
-            setItemsFiltered(items);
-            return;
-        }
-
-        const itemsFilteredByBrand = items.filter(item =>
-            item.brandid.includes(brand)
-        );
-
-        if (itemsFilteredByBrand)
-            setItemsFiltered(itemsFilteredByBrand);
     }
 
     function handleSearch(text: string) {
         if (text) {
-            const searching = items.filter((item) => {
-                const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
+            const searching = yales?.filter((yale) => {
+                const yaleData = yale.name ? yale.name.toUpperCase() : ''.toUpperCase();
                 const textData = text.toUpperCase();
 
-                return itemData.indexOf(textData) > -1;
+                return yaleData.indexOf(textData) > -1;
             });
 
-            setItemsFiltered(searching);
+            setYalesFiltered(searching);
             setQuery(text);
         } else {
             setQuery(text);
@@ -129,21 +101,39 @@ export function ListItems() {
         name: string,
         price: string,
         storage: string,
-        brand: string
-    ) {
-        navigation.navigate('ItemDetail', {
-            id: id,
-            name: name,
-            price: price,
-            storage: storage,
-            brand: brand,
-            category: "items"
+        brand: string) {
+        navigation.navigate("ItemDetail", {
+            id,
+            name,
+            price,
+            storage,
+            brand,
+            category: "yales"
         });
+    }
+
+    function handleYaleSelectedByBrand(brand: string) {
+        flatListItemRef.current?.scrollToIndex({
+            index: 0,
+            animated: true
+        });
+        setBrandSelected(brand);
+        if (brand === "all") {
+            setYalesFiltered(yales);
+            return;
+        }
+
+        const yaleFilteredByBrand = yales?.filter(yale =>
+            yale.brandid.includes(brand)
+        );
+
+        if (yaleFilteredByBrand)
+            setYalesFiltered(yaleFilteredByBrand);
     }
 
     useEffect(() => {
         fetchBrands();
-        fetcItems();
+        fetchYales();
     }, [isFocused]);
 
     return (
@@ -166,12 +156,13 @@ export function ListItems() {
                                 />
                             </View>
                             <FlatList
-                                data={brands}
                                 keyExtractor={(item) => String(item.id)}
+                                data={brands}
+                                ref={flatListItemRef}
                                 renderItem={({ item }) => (
                                     <Tag
                                         name={item.name}
-                                        onPress={() => handleSelectItemsbyBrand(item.id)}
+                                        onPress={() => handleYaleSelectedByBrand(item.id)}
                                         active={item.id === brandSelected}
                                     />
                                 )}
@@ -180,19 +171,18 @@ export function ListItems() {
                                 contentContainerStyle={styles.tags}
                             />
                         </View>
-                        <View style={styles.itemsContainer}>
+                        <View style={styles.yalesContainer}>
                             <FlatList
-                                ref={flatListItemRef}
-                                data={itemsFiltered}
                                 keyExtractor={(item) => String(item.id)}
+                                data={yalesFiltered}
                                 renderItem={({ item }) => (
                                     <Cards
-                                        id={item.id}
                                         name={item.name}
-                                        brand={getBrandName(item.brandid)}
-                                        price={String(item.price)}
+                                        price={item.price}
                                         storage={item.storage}
-                                        warning={Number(item.storage) <= Number(item.minimum)}
+                                        brand={getBrandName(item.brandid)}
+                                        id={item.id}
+                                        warning={(Number(item.storage) <= Number(item.minimum))}
                                         onPress={() => handleItemDetail(
                                             item.id,
                                             item.name,
@@ -222,7 +212,7 @@ const styles = StyleSheet.create({
         height: 90,
         padding: 5,
     },
-    itemsContainer: {
+    yalesContainer: {
         flex: 1,
         paddingHorizontal: 15,
         width: '100%',

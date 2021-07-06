@@ -4,6 +4,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ListItems } from '../screens/ListItems';
 import colors from '../styles/colors';
 import Feather from '@expo/vector-icons/Feather';
+import { Ionicons } from '@expo/vector-icons';
+import { ListYales } from '../screens/ListYales';
+import { Records } from '../screens/Records';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,22 +22,45 @@ export function TabBotton() {
                         paddingTop: 5,
                     },
                     style: {
-                        height: 70,
+
                     },
                     labelStyle: {
-                        fontSize: 15
+                        fontSize: 10,
+                        fontWeight: 'bold'
                     }
                 }
             }
         >
-            <Tab.Screen name="Items" component={ListItems} options={
-                {
-                    tabBarIcon: ({ size, color }) => (
-                        <Feather name="package" size={30} color={colors.warning} />
-                    ),
-                }
-
-            } />
+            <Tab.Screen
+                name="Automotivos"
+                component={ListItems}
+                options={{
+                    tabBarLabel: "Automotivos",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="ios-car-outline" size={size} color={color} />
+                    )
+                }}
+            />
+            <Tab.Screen
+                name="Yales"
+                component={ListYales}
+                options={{
+                    tabBarLabel: "Yales",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="key-outline" size={size} color={color} />
+                    )
+                }}
+            />
+            <Tab.Screen
+                name="Registros"
+                component={Records}
+                options={{
+                    tabBarLabel: "Registros",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="newspaper-outline" size={size} color={color} />
+                    )
+                }}
+            />
         </Tab.Navigator>
     );
 }

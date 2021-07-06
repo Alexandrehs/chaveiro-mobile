@@ -93,12 +93,14 @@ const styles = StyleSheet.create({
     },
     titles: {
         flex: 1,
+        justifyContent: 'space-between'
     },
     name: {
         fontSize: 16,
         fontWeight: '700',
         lineHeight: 30,
-        paddingRight: 10,
+        textAlign: 'left',
+        paddingBottom: 10
 
     },
     details: {
@@ -112,51 +114,5 @@ const styles = StyleSheet.create({
     storage: {
         textAlign: 'center',
         fontWeight: 'bold'
-    },
-    buttomExit: {
-        flex: 1,
-        width: 150,
-        backgroundColor: colors.white,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        right: 20,
-        paddingLeft: 15
-    },
-    buttomEntrance: {
-        flex: 1,
-        width: 150,
-        backgroundColor: colors.white,
-        borderRadius: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        right: 20,
-        paddingLeft: 15
-    },
-    modal: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 22
-    },
-    modalContainer: {
-        backgroundColor: colors.white,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 150,
-        width: 300
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    modalContent: {
-        alignItems: 'center'
-    },
-    modalFooter: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignContent: 'space-around'
     },
 });

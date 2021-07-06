@@ -5,7 +5,6 @@ import {
     Image
 } from 'react-native';
 
-
 import Constants from 'expo-constants';
 
 export function Headers() {
@@ -18,22 +17,15 @@ export function Headers() {
 
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
-        height: 70,
+        flexDirection: 'row',
+        height: 40,
         marginTop: Constants.statusBarHeight,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 50,
-        fontWeight: 'bold',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#ff4040',
-        fontFamily: 'Pacifico_400Regular',
+        alignContent: 'center'
     },
     logo: {
-        height: 100,
-        width: '100%'
+        height: 190,
+        resizeMode: 'center'
     }
 });

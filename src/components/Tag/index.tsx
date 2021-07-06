@@ -7,7 +7,7 @@ import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 
 interface TagProps extends RectButtonProps {
     name: string;
-    active: boolean;
+    active?: boolean;
 }
 
 export function Tag(
@@ -36,8 +36,8 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#d3d3d3',
         borderRadius: 15,
-        width: 120,
-        height: 40,
+        width: 110,
+        height: 35,
         alignItems: 'center',
         justifyContent: 'center',
         paddingHorizontal: 10,
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#adadad',
         borderRadius: 15,
         width: 110,
-        height: 40,
+        height: 35,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 10,
