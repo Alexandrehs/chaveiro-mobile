@@ -19,7 +19,7 @@ import colors from '../../styles/colors';
 interface ItemProps {
     id: string;
     name: string;
-    brandid: string;
+    brand_id: string;
     price: string;
     storage: string;
     minimum: string;
@@ -46,6 +46,10 @@ export function ListItems() {
 
             if (data) {
                 setBrands([
+                    {
+                        id: 'low',
+                        name: 'A PEDIR'
+                    },
                     {
                         id: 'all',
                         name: 'TODOS'
@@ -95,13 +99,21 @@ export function ListItems() {
             animated: true
         });
 
+        if (brand === 'low') {
+            const itemsFilteredByBrand = items.filter(item =>
+                Number(item.storage) <= Number(item.minimum)
+            );
+            setItemsFiltered(itemsFilteredByBrand);
+            return;
+        }
+
         if (brand === 'all') {
             setItemsFiltered(items);
             return;
         }
 
         const itemsFilteredByBrand = items.filter(item =>
-            item.brandid.includes(brand)
+            item.brand_id.includes(brand)
         );
 
         if (itemsFilteredByBrand)
@@ -189,7 +201,7 @@ export function ListItems() {
                                     <Cards
                                         id={item.id}
                                         name={item.name}
-                                        brand={getBrandName(item.brandid)}
+                                        brand={getBrandName(item.brand_id)}
                                         price={String(item.price)}
                                         storage={item.storage}
                                         warning={Number(item.storage) <= Number(item.minimum)}
@@ -198,7 +210,7 @@ export function ListItems() {
                                             item.name,
                                             item.price,
                                             item.storage,
-                                            getBrandName(item.brandid)
+                                            getBrandName(item.brand_id)
                                         )}
                                     />
                                 )}

@@ -30,7 +30,7 @@ interface YalesProps {
     price: string;
     storage: string;
     minimum: string;
-    brandid: string;
+    brand_id: string;
 }
 
 export function ListYales() {
@@ -48,6 +48,10 @@ export function ListYales() {
         try {
             const { data } = await api.get("brands/2");
             setBrands([
+                {
+                    id: "low",
+                    name: "A PEDIR"
+                },
                 {
                     id: "all",
                     name: "TODOS"
@@ -118,13 +122,22 @@ export function ListYales() {
             animated: true
         });
         setBrandSelected(brand);
+
+        if (brand === "low") {
+            const yalesFilteredByBrand = yales.filter(item =>
+                Number(item.storage) <= Number(item.minimum)
+            );
+            setYalesFiltered(yalesFilteredByBrand);
+            return;
+        }
+
         if (brand === "all") {
             setYalesFiltered(yales);
             return;
         }
 
         const yaleFilteredByBrand = yales?.filter(yale =>
-            yale.brandid.includes(brand)
+            yale.brand_id.includes(brand)
         );
 
         if (yaleFilteredByBrand)
@@ -180,7 +193,7 @@ export function ListYales() {
                                         name={item.name}
                                         price={item.price}
                                         storage={item.storage}
-                                        brand={getBrandName(item.brandid)}
+                                        brand={getBrandName(item.brand_id)}
                                         id={item.id}
                                         warning={(Number(item.storage) <= Number(item.minimum))}
                                         onPress={() => handleItemDetail(
@@ -188,7 +201,7 @@ export function ListYales() {
                                             item.name,
                                             item.price,
                                             item.storage,
-                                            getBrandName(item.brandid)
+                                            getBrandName(item.brand_id)
                                         )}
                                     />
                                 )}

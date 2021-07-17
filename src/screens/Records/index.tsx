@@ -33,6 +33,7 @@ export function Records() {
     const [showInitial, setShowInitial] = useState(false);
     const [showFinal, setShowFinal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState(false);
     const navigation = useNavigation();
 
     async function fetchRecordsTotalByTypeEntrance() {
@@ -58,7 +59,8 @@ export function Records() {
 
             if (data) {
                 setRecordExited(data);
-                setLoading(false)
+                setLoading(false);
+                setResult(true);
             }
         } catch (error) {
             throw error;
@@ -66,7 +68,8 @@ export function Records() {
     }
 
     function handleDatePickerInitial(event?, selectedDate?) {
-        setShowInitial(false);
+        // setShowInitial(false);
+        setShowInitial(Platform.OS === 'ios');
         let date = new Date();
         date = selectedDate || date;
         setDate_init(
@@ -75,7 +78,8 @@ export function Records() {
     }
 
     function handleDatePickerFinal(event?, selectedDate?) {
-        setShowFinal(false);
+        // setShowFinal(false);
+        setShowInitial(Platform.OS === 'ios');
         let date = new Date();
         date = selectedDate || date;
         setDate_final(
@@ -97,8 +101,16 @@ export function Records() {
 
     function getRecords() {
         setLoading(true);
+        setShowInitial(false);
+        setShowFinal(false);
         fetchRecordsTotalByTypeEntrance();
         fetchRecordsTotalByTypeExit();
+    }
+
+    function handleSetTimeCurrent() {
+        const date = new Date();
+        setDate_init(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`);
+        setDate_final(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`);
     }
 
     return (
@@ -154,6 +166,7 @@ export function Records() {
                                             value={dateNow}
                                             mode="date"
                                             onChange={handleDatePickerInitial}
+                                            onTouchStart={() => setShowInitial(true)}
                                         />
                                     )
                                 }
@@ -165,78 +178,94 @@ export function Records() {
                                             value={dateNow}
                                             mode="date"
                                             onChange={handleDatePickerFinal}
+                                            onTouchStart={() => setShowFinal(true)}
                                         />
                                     )
                                 }
                             </View>
-                            <RectButton
-                                style={styles.rectButton}
-                                onPress={() => handleRecordList(String(recordEntrance.map((item) => item.type_action)))}
-                            >
-                                <Text style={styles.title}>
-                                    {recordEntrance.map((item) => item.type_action)}
-                                </Text>
-                                <View style={styles.rectButtonContent}>
-                                    <View style={styles.theAmount}>
-                                        <Text style={{ fontWeight: '600', fontSize: 15 }}>
-                                            Entradas <Ionicons name="arrow-up-outline" size={20} color={colors.heading} />
-                                        </Text>
-                                        <Text style={{
-                                            fontSize: 20,
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {recordEntrance.map((item) => item.the_amount)}
-                                        </Text>
-                                    </View>
-                                    <View style={styles.total}>
-                                        <Text style={{ fontWeight: '600', fontSize: 15 }}>
-                                            Total
-                                        </Text>
-                                        <Text style={{
-                                            fontSize: 20,
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {`R$ ${recordEntrance.map((item) => item.total)},00`}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </RectButton>
-                            <RectButton
-                                style={styles.rectButton}
-                                onPress={() => handleRecordList(String(recordExited.map((item) => item.type_action)))}
-                            >
-                                <Text style={styles.title}>
-                                    {recordExited.map((item) => item.type_action)}
-                                </Text>
-                                <View style={styles.rectButtonContent}>
-                                    <View style={styles.theAmount}>
-                                        <Text style={{ fontWeight: '600', fontSize: 15 }}>
-                                            Saídas
-                                            <Ionicons name="arrow-down-outline" size={20} color={colors.heading} />
-                                        </Text>
-                                        <Text style={{
-                                            fontSize: 20,
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {recordExited.map((item) => item.the_amount)}
-                                        </Text>
-                                    </View>
-                                    <View style={styles.total}>
-                                        <Text style={{ fontWeight: '600', fontSize: 15 }}>
-                                            Total
-                                        </Text>
-                                        <Text style={{
-                                            fontSize: 20,
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {`R$ ${recordExited.map((item) => item.total)},00`}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </RectButton>
+                            {
+                                result ?
+                                    <>
+                                        <RectButton
+                                            style={styles.rectButton}
+                                            onPress={() => handleRecordList(String(recordEntrance.map((item) => item.type_action)))}
+                                        >
+                                            <Text style={styles.title}>
+                                                {recordEntrance.map((item) => item.type_action)}
+                                            </Text>
+                                            <View style={styles.rectButtonContent}>
+                                                <View style={styles.theAmount}>
+                                                    <Text style={{ fontWeight: '600', fontSize: 15 }}>
+                                                        Entradas <Ionicons name="arrow-up-outline" size={20} color={colors.heading} />
+                                                    </Text>
+                                                    <Text style={{
+                                                        fontSize: 20,
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {recordEntrance.map((item) => item.the_amount)}
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.total}>
+                                                    <Text style={{ fontWeight: '600', fontSize: 15 }}>
+                                                        Total
+                                                    </Text>
+                                                    <Text style={{
+                                                        fontSize: 20,
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {`R$ ${recordEntrance.map((item) => item.total)},00`}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </RectButton>
+                                        <RectButton
+                                            style={styles.rectButton}
+                                            onPress={() => handleRecordList(String(recordExited.map((item) => item.type_action)))}
+                                        >
+                                            <Text style={styles.title}>
+                                                {recordExited.map((item) => item.type_action)}
+                                            </Text>
+                                            <View style={styles.rectButtonContent}>
+                                                <View style={styles.theAmount}>
+                                                    <Text style={{ fontWeight: '600', fontSize: 15 }}>
+                                                        Saídas
+                                                        <Ionicons name="arrow-down-outline" size={20} color={colors.heading} />
+                                                    </Text>
+                                                    <Text style={{
+                                                        fontSize: 20,
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {recordExited.map((item) => item.the_amount)}
+                                                    </Text>
+                                                </View>
+                                                <View style={styles.total}>
+                                                    <Text style={{ fontWeight: '600', fontSize: 15 }}>
+                                                        Total
+                                                    </Text>
+                                                    <Text style={{
+                                                        fontSize: 20,
+                                                        fontWeight: 'bold'
+                                                    }}>
+                                                        {`R$ ${recordExited.map((item) => item.total)},00`}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                        </RectButton>
+                                    </> :
+                                    <></>
+                            }
                         </View>
                     </>
             }
+            <RectButton
+                onPress={handleSetTimeCurrent}
+                style={{
+                    position: "absolute",
+                    bottom: 10
+                }}
+            >
+                <Ionicons name="timer-outline" size={30} color={colors.warning} />
+            </RectButton>
         </SafeAreaView>
     );
 }

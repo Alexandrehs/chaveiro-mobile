@@ -15,6 +15,9 @@ import {
     Keyboard,
     ActivityIndicator
 } from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+
 import { Tag } from '../../components/Tag';
 import api from '../../services/api';
 import colors from '../../styles/colors';
@@ -40,8 +43,12 @@ export function ItemDetail() {
     } = routes.params as ItemProps;
 
     const [theAmount, setTheAmout] = useState('');
-    const navigation = useNavigation();
+    const [nameEdited, setNameEdited] = useState(name);
+    const [priceEdited, setPriceEdited] = useState(price);
     const [loading, setLoading] = useState(false);
+    const [nameEdit, setNameEdit] = useState(false);
+    const [priceEdit, setPriceEdit] = useState(false);
+    const navigation = useNavigation();
 
     function handleAction(action: string) {
         if (action === 'entrance') {
@@ -84,10 +91,9 @@ export function ItemDetail() {
     }
 
     function handleEntrance() {
-        let newStorage = 0;
         if (Number(theAmount) > 0 && theAmount !== '') {
-            newStorage = Number(storage) + Number(theAmount);
-            updateItem(id, String(newStorage), theAmount, '1');
+            //const newStorage = String(Number(storage) + Number(theAmount));
+            updateItem("1");
         } else {
             Alert.alert(
                 "Desculpe",
@@ -105,10 +111,9 @@ export function ItemDetail() {
     }
 
     function handleExit() {
-        let newStorage = 0;
         if (Number(theAmount) > 0 && theAmount !== '') {
-            newStorage = Number(storage) - Number(theAmount);
-            updateItem(id, String(newStorage), theAmount, '2');
+            //const newStorage = (String(Number(storage) - Number(theAmount)));
+            updateItem("2");
         } else {
             Alert.alert(
                 "Desculpe",
@@ -125,35 +130,45 @@ export function ItemDetail() {
         }
     }
 
-    async function updateItem(id: string, newStorage: string, theAmount: string, type: string) {
+    async function updateItem(type: string) {
+
         const url = `${category}/${id}?type=${type}`;
         try {
             setLoading(true);
-            if (Number(newStorage) > 0) {
-                await api.put(url, {
-                    storage: String(newStorage),
-                    recordTheAmount: theAmount
-                });
-                setLoading(false);
-                Alert.alert(
-                    "OK",
-                    "Alterações salvas.",
-                    [
-                        {
-                            text: "OK",
-                            onPress: () => navigation.navigate("ListItems", {
-                                storage: newStorage
-                            })
-                        }
-                    ],
+            const { data } = await api.put(url, {
+                recordTheAmount: theAmount,
+                name: nameEdited,
+                price: priceEdited
+            });
+
+            Alert.alert(
+                "Resultado",
+                `*${data}*`,
+                [
                     {
-                        cancelable: false
+                        text: "OK",
+                        onPress: () => navigation.goBack()
                     }
-                );
-            }
+                ],
+                {
+                    cancelable: true
+                }
+            );
 
         } catch (error) {
-            console.log(url);
+            Alert.alert(
+                `${url}`,
+                `${error} --ne ${nameEdited} --pe ${priceEdited} -- ${id} --st ${storage} --ta ${theAmount}`,
+                [
+                    {
+                        text: "Ok",
+                        onPress: () => navigation.goBack()
+                    }
+                ],
+                {
+                    cancelable: true
+                }
+            );
         }
     }
 
@@ -174,9 +189,29 @@ export function ItemDetail() {
                                     alignItems: 'center'
                                 }}>
                                     <View style={{ alignItems: 'center' }}>
-                                        <Text style={styles.title}>
-                                            {name}
-                                        </Text>
+                                        <View style={{
+                                            flexDirection: 'row',
+                                            alignContent: 'center'
+                                        }}>
+                                            {
+                                                nameEdit ?
+                                                    <TextInput
+                                                        defaultValue={name}
+                                                        onChangeText={text => setNameEdited(text)}
+                                                        style={styles.title}
+                                                        focusable={true}
+                                                        maxLength={100}
+                                                    />
+                                                    : <Text style={styles.title}>
+                                                        {name}
+                                                    </Text>
+                                            }
+                                            <TouchableOpacity
+                                                onPress={() => setNameEdit(true)}
+                                            >
+                                                <Ionicons name="pencil-sharp" size={28} color={colors.warning} />
+                                            </TouchableOpacity>
+                                        </View>
                                         <Tag name={brand} />
                                     </View>
                                     <View style={styles.content}>
@@ -184,12 +219,31 @@ export function ItemDetail() {
                                             flex: 1,
                                             alignItems: 'center'
                                         }}>
-                                            <Text>
-                                                Preço
-                                            </Text>
-                                            <Text style={styles.contentText}>
-                                                {`R$ ${price},00`}
-                                            </Text>
+                                            <View style={{
+                                                flexDirection: 'row',
+                                            }}>
+                                                <Text>
+                                                    Preço
+                                                </Text>
+                                                <TouchableOpacity
+                                                    onPress={() => setPriceEdit(true)}
+                                                >
+                                                    <Ionicons name="pencil-sharp" size={18} color={colors.warning} />
+                                                </TouchableOpacity>
+                                            </View>
+                                            {
+                                                priceEdit ?
+                                                    <TextInput
+                                                        defaultValue={price}
+                                                        onChangeText={text => setPriceEdited(String(Number(text)))}
+                                                        maxLength={4}
+                                                        keyboardType="numeric"
+                                                    />
+                                                    :
+                                                    <Text style={styles.contentText}>
+                                                        R$ {price},00
+                                                    </Text>
+                                            }
                                         </View>
                                         <View style={{
                                             flex: 1,
@@ -203,69 +257,125 @@ export function ItemDetail() {
                                             </Text>
                                         </View>
                                     </View>
-                                    <View>
-                                        <TextInput
-                                            style={{
-                                                backgroundColor: '#E8E8E8',
-                                                height: 40,
-                                                width: 150,
-                                                borderRadius: 20,
-                                                paddingHorizontal: 15
-                                            }}
-                                            autoCorrect={false}
-                                            value={theAmount}
-                                            onChangeText={text => setTheAmout(text)}
-                                            placeholder="quantidade..."
-                                            keyboardType="numeric"
-                                        />
-                                    </View>
+                                    {
+                                        !nameEdit && !priceEdit ?
+                                            <View>
+                                                <TextInput
+                                                    style={{
+                                                        backgroundColor: '#E8E8E8',
+                                                        height: 40,
+                                                        width: 150,
+                                                        borderRadius: 20,
+                                                        paddingHorizontal: 15
+                                                    }}
+                                                    autoCorrect={false}
+                                                    onChangeText={text => setTheAmout(text)}
+                                                    placeholder="quantidade..."
+                                                    keyboardType="numeric"
+                                                />
+                                            </View> :
+                                            <></>
+                                    }
                                     <View style={styles.actions}>
                                         <View style={styles.buttons}>
-                                            <View>
-                                                <TouchableOpacity
-                                                    style={{
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        backgroundColor: colors.green_light,
-                                                        height: 50,
-                                                        width: 110,
-                                                        borderRadius: 30,
-                                                        marginRight: 100
-                                                    }}
-                                                    onPress={() => handleAction('entrance')}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            fontWeight: 'bold'
-                                                        }}
-                                                    >
-                                                        Entrada
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                            <View>
-                                                <TouchableOpacity
-                                                    style={{
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        backgroundColor: colors.red,
-                                                        height: 50,
-                                                        width: 110,
-                                                        borderRadius: 30,
-                                                    }}
-                                                    onPress={() => handleAction('exit')}
-                                                >
-                                                    <Text
-                                                        style={{
-                                                            fontSize: 16,
-                                                            fontWeight: 'bold'
-                                                        }}
-                                                    >
-                                                        Saida
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </View>
+                                            {
+                                                nameEdit || priceEdit ?
+                                                    <>
+                                                        <View>
+                                                            <TouchableOpacity
+                                                                style={{
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    backgroundColor: colors.green_light,
+                                                                    height: 50,
+                                                                    width: 110,
+                                                                    borderRadius: 30,
+                                                                    marginRight: 100
+                                                                }}
+                                                                onPress={() => updateItem("1")}
+                                                            >
+                                                                <Text
+                                                                    style={{
+                                                                        fontSize: 16,
+                                                                        fontWeight: 'bold'
+                                                                    }}
+                                                                >
+                                                                    Salvar
+                                                                </Text>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                        <View>
+                                                            <TouchableOpacity
+                                                                style={{
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    backgroundColor: colors.red,
+                                                                    height: 50,
+                                                                    width: 110,
+                                                                    borderRadius: 30,
+                                                                }}
+                                                                onPress={() => navigation.goBack()}
+                                                            >
+                                                                <Text
+                                                                    style={{
+                                                                        fontSize: 16,
+                                                                        fontWeight: 'bold'
+                                                                    }}
+                                                                >
+                                                                    Cancelar
+                                                                </Text>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                    </> :
+                                                    <>
+                                                        <View>
+                                                            <TouchableOpacity
+                                                                style={{
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    backgroundColor: colors.green_light,
+                                                                    height: 50,
+                                                                    width: 110,
+                                                                    borderRadius: 30,
+                                                                    marginRight: 100
+                                                                }}
+                                                                onPress={() => handleAction('entrance')}
+                                                            >
+                                                                <Text
+                                                                    style={{
+                                                                        fontSize: 16,
+                                                                        fontWeight: 'bold'
+                                                                    }}
+                                                                >
+                                                                    Entrada
+                                                                </Text>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                        <View>
+                                                            <TouchableOpacity
+                                                                style={{
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    backgroundColor: colors.red,
+                                                                    height: 50,
+                                                                    width: 110,
+                                                                    borderRadius: 30,
+                                                                }}
+                                                                onPress={() => handleAction('exit')}
+                                                            >
+                                                                <Text
+                                                                    style={{
+                                                                        fontSize: 16,
+                                                                        fontWeight: 'bold'
+                                                                    }}
+                                                                >
+                                                                    Saida
+                                                                </Text>
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                    </>
+                                            }
+
                                         </View>
                                     </View>
                                 </View>

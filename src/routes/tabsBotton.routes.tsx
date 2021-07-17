@@ -7,6 +7,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { Ionicons } from '@expo/vector-icons';
 import { ListYales } from '../screens/ListYales';
 import { Records } from '../screens/Records';
+import { ItemCreate } from '../screens/ItemCreate';
 
 const Tab = createBottomTabNavigator();
 
@@ -58,6 +59,16 @@ export function TabBotton() {
                     tabBarLabel: "Registros",
                     tabBarIcon: ({ color, size }) => (
                         <Ionicons name="newspaper-outline" size={size} color={color} />
+                    )
+                }}
+            />
+            <Tab.Screen
+                name="Inserir"
+                component={ItemCreate}
+                options={{
+                    tabBarLabel: "Inserir",
+                    tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="add-outline" size={size} color={color} />
                     )
                 }}
             />

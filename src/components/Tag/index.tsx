@@ -4,6 +4,7 @@ import {
     StyleSheet
 } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
+import colors from '../../styles/colors';
 
 interface TagProps extends RectButtonProps {
     name: string;
@@ -20,7 +21,8 @@ export function Tag(
             style={
                 [
                     styles.container,
-                    active && styles.containerActive
+                    active && styles.containerActive,
+                    name === "A PEDIR" && styles.low
                 ]
             }
             {...rest}
@@ -58,4 +60,14 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#5f5f5f',
     },
+    low: {
+        backgroundColor: colors.warning,
+        borderRadius: 15,
+        width: 110,
+        height: 35,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        marginLeft: 6
+    }
 });
