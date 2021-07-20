@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ListYales } from '../screens/ListYales';
 import { Records } from '../screens/Records';
 import { ItemCreate } from '../screens/ItemCreate';
+import { TabsTop } from './tabsTop.routes';
 
 const Tab = createBottomTabNavigator();
 
@@ -64,7 +65,7 @@ export function TabBotton() {
             />
             <Tab.Screen
                 name="Inserir"
-                component={ItemCreate}
+                component={TabsTop}
                 options={{
                     tabBarLabel: "Inserir",
                     tabBarIcon: ({ color, size }) => (

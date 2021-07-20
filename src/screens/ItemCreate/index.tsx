@@ -221,7 +221,6 @@ export function ItemCreate() {
                                     </Text>
                                 </TouchableOpacity>
                             </View>
-                            <Text>{name}</Text>
                         </View>
                     </>
             }
