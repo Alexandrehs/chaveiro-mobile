@@ -119,8 +119,8 @@ export function ItemCreate() {
                                 Cadastro de Produto
                             </Text>
                         </View>
-                        <View>
-                            <View style={styles.inputContent}>
+                        <View style={styles.inputContent}>
+                            <View>
                                 <Text style={{
                                     marginBottom: 10
                                 }}>
@@ -138,7 +138,9 @@ export function ItemCreate() {
                                         justifyContent: 'space-around'
                                     }}
                                 >
-                                    <View>
+                                    <View style={{
+                                        alignItems: 'center'
+                                    }}>
                                         <Text style={{
                                             marginBottom: 10
                                         }}>
@@ -148,10 +150,12 @@ export function ItemCreate() {
                                             onChangeText={text => setPrice(text)}
                                             keyboardType="numeric"
                                             maxLength={3}
-                                            style={[styles.input, { width: 100 }]}
+                                            style={[styles.input, { width: '100%' }]}
                                         />
                                     </View>
-                                    <View>
+                                    <View style={{
+                                        alignItems: 'center'
+                                    }}>
                                         <Text style={{
                                             marginBottom: 10
                                         }}>
@@ -161,14 +165,16 @@ export function ItemCreate() {
                                             onChangeText={text => setStorage(text)}
                                             keyboardType="numeric"
                                             maxLength={3}
-                                            style={[styles.input, { width: 100 }]}
+                                            style={[styles.input, { width: '100%' }]}
                                         />
                                     </View>
-                                    <View>
+                                    <View style={{
+                                        alignItems: 'center'
+                                    }}>
                                         <Text style={{
                                             marginBottom: 10
                                         }}>
-                                            Quantidade minima:
+                                            Minimo:
                                         </Text>
                                         <TextInput
                                             onChangeText={text => setMinimum(text)}
@@ -236,8 +242,9 @@ const styles = StyleSheet.create({
     input: {
         backgroundColor: colors.gray,
         height: 40,
-        borderRadius: 20,
+        borderRadius: 15,
         paddingHorizontal: 15,
+        width: '100%'
     },
     buttomSave: {
         height: 40,
