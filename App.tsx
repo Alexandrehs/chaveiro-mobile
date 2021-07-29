@@ -1,9 +1,13 @@
 import React from 'react';
 import { Routes } from './src/routes';
+import { StatusBar, Platform } from 'react-native';
 
 export default function App() {
 
 	return (
-		<Routes />
+		<>
+			<StatusBar barStyle={Platform.OS === 'ios' ? "dark-content" : "default"} />
+			<Routes />
+		</>
 	);
 }

@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tag } from '../../components/Tag';
 import api from '../../services/api';
 import colors from '../../styles/colors';
+import { Headers } from '../../components/Headers';
 
 interface ItemProps {
     id: string;
@@ -43,7 +44,7 @@ export function ItemDetail() {
     } = routes.params as ItemProps;
 
     const [theAmount, setTheAmout] = useState('');
-    const [nameEdited, setNameEdited] = useState(name);
+    const [nameEdited, setNameEdited] = useState(null);
     const [priceEdited, setPriceEdited] = useState(price);
     const [loading, setLoading] = useState(false);
     const [nameEdit, setNameEdit] = useState(false);
@@ -130,6 +131,61 @@ export function ItemDetail() {
         }
     }
 
+    function handleDelete() {
+        Alert.alert(
+            "Deletar",
+            "Você tem certeza que deseja excluir?",
+            [
+                {
+                    text: "DELETAR",
+                    onPress: () => deleteItemOrYale()
+                },
+                {
+                    text: "Cancelar"
+                }
+            ],
+            {
+                cancelable: true
+            }
+        );
+    }
+
+    async function deleteItemOrYale() {
+        const url = `${category}/delete?id=${id}`;
+        try {
+            const { data } = await api.delete(url);
+
+            if (data) {
+                Alert.alert(
+                    "Mensagem",
+                    data,
+                    [
+                        {
+                            text: "Ok",
+                            onPress: () => navigation.goBack()
+                        }
+                    ],
+                    {
+                        cancelable: true
+                    }
+                );
+            }
+        } catch (error) {
+            Alert.alert(
+                "Mensagem",
+                `Desculpe houve algum erro, ${error}`,
+                [
+                    {
+                        text: "ok"
+                    }
+                ],
+                {
+                    cancelable: true
+                }
+            );
+        }
+    }
+
     async function updateItem(type: string) {
 
         const url = `${category}/${id}?type=${type}`;
@@ -158,7 +214,13 @@ export function ItemDetail() {
         } catch (error) {
             Alert.alert(
                 `${url}`,
-                `${error} --ne ${nameEdited} --pe ${priceEdited} -- ${id} --st ${storage} --ta ${theAmount}`,
+                `${error} 
+                    --ne ${nameEdited} 
+                    --pe ${priceEdited} 
+                    -- ${id} 
+                    --st ${storage} 
+                    --ta ${theAmount}
+                    --type ${type}`,
                 [
                     {
                         text: "Ok",
@@ -178,6 +240,11 @@ export function ItemDetail() {
                 loading ?
                     <ActivityIndicator size="large" color={colors.warning} /> :
                     <>
+                        <Headers
+                            logo={false}
+                            del={true}
+                            onPress={handleDelete}
+                        />
                         <KeyboardAvoidingView
                             style={styles.constainer}
                             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -201,6 +268,8 @@ export function ItemDetail() {
                                                         style={styles.title}
                                                         focusable={true}
                                                         maxLength={100}
+                                                        autoCorrect={false}
+                                                        autoFocus={nameEdit}
                                                     />
                                                     : <Text style={styles.title}>
                                                         {name}
@@ -238,6 +307,8 @@ export function ItemDetail() {
                                                         onChangeText={text => setPriceEdited(String(Number(text)))}
                                                         maxLength={4}
                                                         keyboardType="numeric"
+                                                        autoFocus={priceEdit}
+                                                        style={styles.contentText}
                                                     />
                                                     :
                                                     <Text style={styles.contentText}>
@@ -292,7 +363,7 @@ export function ItemDetail() {
                                                                     borderRadius: 30,
                                                                     marginRight: 100
                                                                 }}
-                                                                onPress={() => updateItem("1")}
+                                                                onPress={() => updateItem("")}
                                                             >
                                                                 <Text
                                                                     style={{
@@ -391,6 +462,7 @@ const styles = StyleSheet.create({
     constainer: {
         flex: 1,
         justifyContent: 'space-around',
+        padding: 15
     },
     title: {
         fontSize: 30,

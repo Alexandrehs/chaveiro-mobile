@@ -6,7 +6,8 @@ import {
     StyleSheet,
     SafeAreaView,
     Button,
-    Platform
+    Platform,
+    Alert
 } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { Headers } from '../../components/Headers';
@@ -100,11 +101,25 @@ export function Records() {
     }
 
     function getRecords() {
-        setLoading(true);
         setShowInitial(false);
         setShowFinal(false);
-        fetchRecordsTotalByTypeEntrance();
-        fetchRecordsTotalByTypeExit();
+        if (date_init && date_final) {
+            setLoading(true);
+            fetchRecordsTotalByTypeEntrance();
+            fetchRecordsTotalByTypeExit();
+        } else {
+            Alert.alert(
+                "Mensagem",
+                "Escolha as datas antes.",
+                [
+                    {
+                        text: 'Ok'
+                    }
+                ], {
+                cancelable: true
+            }
+            );
+        }
     }
 
     function handleSetTimeCurrent() {
@@ -119,7 +134,7 @@ export function Records() {
                 loading ?
                     <Loading /> :
                     <>
-                        <Headers />
+                        <Headers logo={true} />
                         <View style={styles.content}>
                             <Text style={{
                                 fontWeight: 'bold',
@@ -158,6 +173,29 @@ export function Records() {
                                         Buscar
                                     </Text>
                                 </RectButton>
+                            </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                }}
+                            >
+                                <Text>
+                                    {
+                                        date_init
+                                    }
+                                </Text>
+                                <Text
+                                    style={{
+                                        marginHorizontal: 15
+                                    }}
+                                >
+                                    até
+                                </Text>
+                                <Text>
+                                    {
+                                        date_final
+                                    }
+                                </Text>
                             </View>
                             <View>
                                 {

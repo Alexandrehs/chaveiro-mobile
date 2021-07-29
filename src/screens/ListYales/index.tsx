@@ -155,7 +155,7 @@ export function ListYales() {
                 loading ?
                     <Loading /> :
                     <>
-                        <Headers />
+                        <Headers logo={true} />
                         <View>
                             <View
                                 style={styles.containerHeaderSearch}

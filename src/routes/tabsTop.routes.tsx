@@ -4,6 +4,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { ItemCreate } from '../screens/ItemCreate';
 import { BrandCreate } from '../screens/BrandCreate';
 import colors from '../styles/colors';
+import Constants from 'expo-constants';
 
 const Tabs = createMaterialTopTabNavigator();
 
@@ -13,12 +14,18 @@ export function TabsTop() {
             tabBarOptions={{
                 activeTintColor: colors.warning,
                 style: {
-                    borderBottomColor: colors.warning
+                    marginTop: Constants.statusBarHeight
+                },
+                indicatorStyle: {
+                    backgroundColor: colors.warning
+                },
+                labelStyle: {
+                    fontWeight: 'bold'
                 }
             }}
         >
             <Tabs.Screen name="Items" component={ItemCreate} />
-            <Tabs.Screen name="Brands" component={BrandCreate} />
+            <Tabs.Screen name="Marcas" component={BrandCreate} />
         </Tabs.Navigator>
     );
 }

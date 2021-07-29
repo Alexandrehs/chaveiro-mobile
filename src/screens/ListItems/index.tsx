@@ -164,7 +164,7 @@ export function ListItems() {
                 loading ?
                     <Loading /> :
                     <>
-                        <Headers />
+                        <Headers logo={true} />
                         <View>
                             <View
                                 style={styles.containerHeaderSearch}
